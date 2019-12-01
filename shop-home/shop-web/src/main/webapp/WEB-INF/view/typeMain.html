@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+<link rel="stylesheet" href="/commons/layui/css/layui.css"/>
+
+<link rel="stylesheet" href="/commons/ztree/css/bootstrapStyle/bootstrapStyle.css"/>
+
+<link rel="stylesheet" href="/commons/selectTree/plugin/css/index.css"/>
+<script type="text/javascript" src="/commons/jq/jquery-3.2.1.js"></script>
+<script type="text/javascript" src="/commons/commons.js"></script>
+<script type="text/javascript" src="/commons/layui/layui.all.js"></script>
+<script type="text/javascript" src="/commons/ztree/js/jquery.ztree.all.js"></script>
+<script type="text/javascript" src="/commons/dateFormat.js"></script>
+<script type="text/javascript" src="/commons/selectTree/plugin/js/selectTree.js"></script>
+
+    <title>Title</title>
+</head>
+<body>
+<div class="layui-tab layui-tab-card">
+
+    <ul class="layui-tab-title">
+        <li><h3> 类型维护</h3></li>
+    </ul>
+    <div class="layui-tab-content" >
+        <div class="layui-row layui-col-space10">
+            <div class="layui-col-md4" >
+                <div class="layui-card" style="height: 370px">
+                    <div class="layui-card-header">类型树展示
+                        <div class="layui-btn-group" style="margin-left:50px">
+                            <button type="button" class="layui-btn layui-btn-sm" id="addCategroy" name="categroyOptionBtn" onclick="addType()">增加类别</button>
+                            <button type="button" class="layui-btn layui-btn-sm layui-btn-disabled" id="noValid" name="categroyOptionBtn"  disabled="disabled">置无效</button>
+                        </div>
+                    </div>
+                    <div class="layui-card-body">
+                        <%-- ztree输的展示--%>
+                        <div class="ztree" id="categroyTree"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-col-md8" style="overflow: auto ">
+                <div class="layui-card" style="height: 370px">
+                    <div class="layui-card-header" id="updateTitle">类型修改</div>
+                    <div class="layui-card-body" id="updateBody">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var settings={
+        view: {
+            selectedMulti: false
+        },
+        callback:{
+            onClick:typeClick
+        }
+    }
+    $(function(){
+        $.post("http://localhost:8090/queryType",function (result) {
+            if(result.code==200){
+                $.fn.zTree.init($("#categroyTree"),settings,result.data);
+            }else{
+                layer.msg("数据展示失败", {icon: 5});
+            }
+
+        })
+    })
+    //类型树的点击事件
+    function typeClick(event,treeId,treeNode){
+
+        var params={};
+        params.id=treeNode.id;
+        $.post("http://localhost:8090/toTypeEdit",params,function (result) {
+            $("#updateBody").html(result);
+            $("#updateTitle").html("正在进行类型修改");
+            var pnode=treeNode.getParentNode();
+            if(pnode==null){
+                $("#pCategroyName").val("这是根节点");
+                $("#parentId").val(0);
+            }else{
+                $("#pCategroyName").val(pnode.name);
+                $("#parentId").val(pnode.id);
+            }
+
+
+
+        })
+    }
+    function addType(){
+        var treeObj=$.fn.zTree.getZTreeObj("categroyTree");
+        var selectNodes=treeObj.getSelectedNodes();
+
+        $.post("http://localhost:8090/toTypeEdit",function (result) {
+            $("#updateBody").html(result);
+            $("#updateTitle").html("正在进行类型增加");
+                if(selectNodes == null || selectNodes.length == 0){
+                    $("#pCategroyName").val("这是根节点");
+                    $("#parentId").val(0);
+                }else{
+                    $("#pCategroyName").val(selectNodes[0].name);
+                    $("#parentId").val(selectNodes[0].id);
+                }
+        });
+    }
+</script>
+</body>
+</html>

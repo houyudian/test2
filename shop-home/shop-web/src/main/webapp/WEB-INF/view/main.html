@@ -1,0 +1,164 @@
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" href="/commons/fileinput/css/style.css" rel="stylesheet" />
+
+    <script type="text/javascript" src="/commons/fileinput/js/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="/commons/layui/css/layui.css"/>
+
+    <link rel="stylesheet" href="/commons/ztree/css/bootstrapStyle/bootstrapStyle.css"/>
+
+    <link rel="stylesheet" href="/commons/selectTree/plugin/css/index.css"/>
+    <script type="text/javascript" src="/commons/jq/jquery-3.2.1.js"></script>
+    <script type="text/javascript" src="/commons/commons.js"></script>
+    <script type="text/javascript" src="/commons/layui/layui.all.js"></script>
+    <script type="text/javascript" src="/commons/ztree/js/jquery.ztree.all.js"></script>
+    <script type="text/javascript" src="/commons/dateFormat.js"></script>
+    <script type="text/javascript" src="/commons/selectTree/plugin/js/selectTree.js"></script>
+</head>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+    <div class="layui-header">
+        <div class="layui-logo">电商 后台管理</div>
+        <!-- 头部区域（可配合layui已有的水平导航） -->
+        <ul class="layui-nav layui-layout-left">
+            <li class="layui-nav-item"><a href="">控制台</a></li>
+            <li class="layui-nav-item"><a href="">商品管理</a></li>
+            <li class="layui-nav-item"><a href="">用户</a></li>
+            <li class="layui-nav-item">
+                <a href="javascript:;">其它系统</a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">邮件管理</a></dd>
+                    <dd><a href="">消息管理</a></dd>
+                    <dd><a href="">授权管理</a></dd>
+                </dl>
+            </li>
+        </ul>
+        <ul class="layui-nav layui-layout-right">
+            <li class="layui-nav-item">
+                <a href="javascript:;">
+                    <img src="<%=request.getContextPath()%>/commons/orgimg/hjkn.png" class="layui-nav-img">
+                    ${user.loginName}
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>
+            </li>
+            <li class="layui-nav-item"><a href="">退出</a></li>
+        </ul>
+    </div>
+
+    <div class="">
+        <div class="">
+            <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+
+                <div class="container col-md-2">
+                    <div class="sec-mainL left" id="left"></div>
+                </div>
+
+        </div>
+    </div>
+
+    <div class="layui-body">
+    <!-- 内容主体区域 -->
+        <div style="padding: 15px;" id="mainBody">
+
+            <div class="float-left">
+                <img src="<%=request.getContextPath() %>/commons/orgimg/psb.png"  >
+                <div class="alert"> wa哇！酷酷的！ </div>
+            </div>
+        </div>
+   </div>
+
+</div>
+
+<script type="text/javascript">
+
+
+
+
+
+        $(function () {
+            var $top = $('.sec-mainNav').offset().top + $('.sec-mainNav').height()
+            //左侧导航动画
+            $('.sec-mainNav li').on('mouseenter', function () {
+                var $height = $(this).offset().top + $(this).find('.menu-panel').outerHeight();
+                $(this).find('.menu-panel').show();
+                if ($height - $top >= 0) {
+                    $(this).find('.menu-panel').css({
+                        top: -($height - $top) + 'px'
+                    })
+                }
+            });
+            $('.sec-mainNav li').on('mouseleave', function () {
+                $(this).find('.menu-panel').hide();
+            });
+        });
+
+    var shopHtml = "";
+    $.ajax({
+        url: "http://localhost:8090/queryMenuList",
+        type: "get",
+        dataType: "json",
+        success: function (result) {
+            shopHtml += '<div class="mainL-hd-box" > <h2 class="mainL-hd">' + result[0].name + '</h2> </div>'
+            $("#left").html(shopHtml);
+
+            var secondNodes = result[0].children;
+            if (secondNodes.length > 0) {
+                typeList(secondNodes);
+            }
+
+        },
+        error: function () {
+            alert("失败了")
+        }
+    })
+
+
+    function typeList(secondNodes) {
+        for (var i = 0; i < secondNodes.length; i++) {
+            shopHtml += '<ul class="sec-mainNav"><li>'
+            shopHtml += '<h3>' + secondNodes[i].name + '</h3>'
+
+            var secondNodes2 = secondNodes[i].children;
+            if (secondNodes2.length > 0) {
+                shopTypeList(secondNodes2);
+            }
+            shopHtml += '</li> </ul>'
+        }
+
+        $("#left").html(shopHtml);
+
+    }
+
+    function shopTypeList(secondNodes2) {
+        for (var i = 0; i < secondNodes2.length; i++) {
+            shopHtml += '<div class="menu-tab">'
+            shopHtml += '<a href="javascript:;" onclick="shopShow(' + secondNodes2[i].id + ')">' + secondNodes2[i].name + '</a>'
+            shopHtml += '<div class="fix"></div> </div> <span class="menu-more">更多</span> <div class="menu-panel"> <div class="menu-panel-hd"> <h4>热门分类</h4> <div class="sub-group"> <a href="">京东</a><a href="">易迅</a> <a href="">苏宁易购</a> <a href="">新蛋商城</a> <a href="">手机数码</a> <a href="">摄像影音</a> <a href="">耳麦音响</a> <a href="">国美在线</a> </div> </div> <div class="menu-panel-bd"><ul> <li> <a href=""><img src="/commons/img/0.png" /></a> </li> <li> <a href=""><img src="/commons/img/0(1).png" /></a> </li> <li> <a href=""><img src="/commons/img/0(2).png" /></a> </li> <li> <a href=""><img src="/commons/img/0 (3).png" /></a> </li> <li> <a href=""><img src="/commons/img/0.jpg" /></a> </li> </ul> </div> <a href="" class="menu-panel-btn"><span>查看全部商家</span> <em></em> </a> </div>'
+        }
+        shopHtml += '<div class="menu-panel"><div class="menu-panel-hd"><h4>热门分类</h4> <div class="sub-group">'
+        for (var j = 0; j < secondNodes2.length; j++) {
+            shopHtml += '<a href="javascript:;" onclick="shopShow(' + secondNodes2[j].id + ')">' + secondNodes2[j].name + '</a>'
+        }
+        shopHtml += '</div></div>'
+        $("#left").html(shopHtml);
+    }
+</script>
+</div>
+
+<%--展示--%>
+<div class="container col-md-10" id="shopJsp"style="height: 70%">
+    huahua
+</div>
+
+
+</body>
+</html>

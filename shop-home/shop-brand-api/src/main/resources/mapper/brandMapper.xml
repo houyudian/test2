@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.fh.dao.BrandDao">
+
+    <!--统计总条数-->
+    <select id="queryCount" resultType="java.lang.Long">
+    select count(brandId) from s_brand
+  </select>
+
+    <select id="queryBrand" parameterType="com.fh.utils.PageEntity" resultType="com.fh.bean.Brand">
+
+ select  brandId,brandName,telephone,brandWeb,brandLogo,brandDesc,brandStatus,brandOrder,modifiedTime from
+
+    s_brand
+    limit #{start},#{pageSize}
+  </select>
+
+
+    <select id="queryCountByTypeIds" parameterType="java.lang.String" resultType="java.lang.Long">
+        select  count(DISTINCT sb.brand_id) from s_brand sb
+        LEFT JOIN s_brandType sbc
+        on sb.brand_id=sbc.brand_id
+        where sbc.categroy_id in
+    </select>
+
+    <select id="queryBrandByTypeId" parameterType="java.lang.Integer" resultType="com.fh.bean.Brand">
+select b.brandId,b.brandName,b.brandLogo,b.brandWeb,b.telephone,b.categroyId,t.id from s_brand b
+left join s_type t on b.categroyId=t.id
+    </select>
+
+</mapper>

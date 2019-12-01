@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <addNotNullAssertions enabled="false" />
+    <annotationProcessing>
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="shop-brand-api" />
+        <module name="shop-car" />
+        <module name="shop-commons" />
+        <module name="shop-login" />
+        <module name="shop-permission-api" />
+        <module name="shop-product-api" />
+        <module name="shop-type-api" />
+        <module name="shop-web" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="shop-brand-api" target="8" />
+      <module name="shop-car" target="8" />
+      <module name="shop-commons" target="8" />
+      <module name="shop-login" target="8" />
+      <module name="shop-permission-api" target="8" />
+      <module name="shop-product-api" target="8" />
+      <module name="shop-type-api" target="8" />
+      <module name="shop-web" target="8" />
+    </bytecodeTargetLevel>
+  </component>
+</project>

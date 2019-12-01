@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+<body>
+<form class="layui-form">
+    <input type="hidden" name="id" value="${categroy.id}" id="cateId"/>
+    <div class="layui-form-item">
+        <label class="layui-form-label">父类型名称</label>
+        <div class="layui-input-block">
+            <input type="text"  id="pCategroyName" lay-verify="required" class="layui-input" readonly>
+            <input type="hidden" id="parentId" name="parentId" class="layui-input" />
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">类型名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="name" required  lay-verify="required" placeholder="请输入类型名称 长度不要超过10个汉字" autocomplete="off" maxlength="10" class="layui-input" value="${categroy.name}">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">类型状态</label>
+        <div class="layui-input-block">
+            <input type="radio" name="status" value="1" title="有效" ${categroy.status==1?"checked":null}>
+            <input type="radio" name="status" value="2" title="无效"  ${categroy.status==2?"checked":null}>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">排序</label>
+        <div class="layui-input-block">
+            <input type="number" name="sortOrder" required  lay-verify="required"  autocomplete="off" maxlength="10" class="layui-input" value="${categroy.sortOrder}">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button type="button" class="layui-btn" lay-submit="" lay-filter="submitCategroy" id="submitCategroy">立即提交</button>
+        </div>
+    </div>
+</form>
+<script type="text/javascript">
+    layui.use("form",function () {
+        var form=layui.form;
+        form.render();
+
+        layui.form.on("submit(submitCategroy)",function (data) {
+            $.post("http://localhost:8090/addType",data.field,function (result) {
+                    if(result.code == 200){
+                        layer.msg("保存类型成功",{icon:6});
+                        var organTree=$.fn.zTree.getZTreeObj("categroyTree");
+                        var selectNodes=organTree.getSelectedNodes();
+                        var cateId=data.field.id;
+                        if(cateId != null && cateId != ""){
+                            selectNodes[0].name=result.data.name;
+                            organTree.updateNode(selectNodes[0]);
+                        }else{
+                            var newNode={};
+                            newNode.id=result.data.id;
+                            newNode.name=result.data.name;
+                            if(selectNodes == null || selectNodes.length == 0){
+                                organTree.addNodes(null,newNode);
+                            }else{
+                                organTree.addNodes(selectNodes[0],newNode);
+                            }
+                            $("#submitCategroy").addClass("layui-btn-disabled");
+                            $("#submitCategroy").attr("disabled","disabled");
+
+                        }
+                    }else{
+                        layer.msg("保存类型失败",{icon:5});
+                    }
+            })
+        })
+    })
+</script>
+</body>
+</html>

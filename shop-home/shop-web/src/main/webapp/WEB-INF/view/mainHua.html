@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link type="text/css" href="/commons/fileinput/css/style.css" rel="stylesheet" />
+    <link href="/commons/bootstrap/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="/commons/datatable/DataTables-1.10.18/css/dataTables.bootstrap.min.css" rel="stylesheet"/>
+    <link href="/commons/fileinput/css/fileinput.min.css" rel="stylesheet"/>
+    <script type="text/javascript" src="/commons/fileinput/js/jquery.min.js"></script>
+
+    <script type="text/javascript" src="/commons/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/commons/datatable/DataTables-1.10.18/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="/commons/datatable/DataTables-1.10.18/js/dataTables.bootstrap.min.js"></script>
+    <script type="text/javascript" src="/commons/dateFormat.js"></script>
+    <script type="text/javascript" src="/commons/bootbox/bootbox.min.js"></script>
+    <script type="text/javascript" src="/commons/fileinput/js/fileinput.min.js"></script>
+    <script type="text/javascript" src="/commons/fileinput/js/locales/zh.js"></script>
+</head>
+
+<body>
+<!--左侧菜单-->
+<div class="sec-mainL left">
+    <div class="mainL-hd-box">
+        <h2 class="mainL-hd"><a href="#">购物商家</a></h2>
+    </div>
+    <!--菜单列表-->
+    <ul class="sec-mainNav">
+
+    </ul>
+</div>
+<div class="left container" style="margin-left: 20px">
+    <div class="row" id="categoryMain"></div>
+    <div class="row" id="brandMain"></div>
+
+</div>
+<script type="text/javascript">
+    $(function() {
+        //加载查询左侧商品类型导航树：
+        initCategory();
+        var $top = $('.sec-mainNav').offset().top + $('.sec-mainNav').height()
+        //左侧导航动画
+        $('.sec-mainNav li').on('mouseenter', function() {
+            var cateId=$(this).attr("cateid");
+            var cateHtml='<div class="menu-panel">';
+            cateHtml+=getAllCategoryByPid(cateId);
+            cateHtml+=getAllBrandByCateId(cateId);
+            cateHtml+='</div>';
+            $(this).append(cateHtml);
+            var $height = $(this).offset().top + $(this).find('.menu-panel').outerHeight();
+            $(this).find('.menu-panel').show();
+            if($height - $top >= 0) {
+                $(this).find('.menu-panel').css({
+                    top: -($height - $top) + 'px'
+                })
+            }
+        });
+        $('.sec-mainNav li').on('mouseleave', function() {
+            $(this).find('.menu-panel').hide();
+        });
+    });
+
+    /**
+     * 通过商品类别ID获取所有品牌
+     * */
+    function getAllBrandByCateId(cateId){
+        var cateHtml="";
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8090/brands/"+cateId,
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                if(result.code == 200){
+                    var data=result.data;
+                    //拼接类别菜单
+                    cateHtml+='<div class="menu-panel-bd">';
+                    cateHtml+=' <ul>';
+                    for(var i=0;i<data.length;i++){
+                        cateHtml+='<li><a href="javascript:void(0)" pcate="'+cateId+'"  onclick="searchProduct(this)" brandId="'+data[i].brandId+'"><img src="'+data[i].brandLogo+'" /></a></li>';
+                    }
+                    cateHtml+='</ul>';
+                    cateHtml+='</div>';
+
+                }
+            }
+        })
+        return cateHtml;
+    }
+    /**
+     * 通过商品类别ID获取所有子类别
+     * */
+    function getAllCategoryByPid(cateId){
+        var cateHtml="";
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8090/categorys/"+cateId,
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                if(result.code == 200){
+                    var data=result.data;
+                    //拼接类别菜单
+                    cateHtml+='<div class="menu-panel-hd">';
+                    cateHtml+='<h4>热门分类</h4>';
+                    cateHtml+='<div class="sub-group">';
+                    for(var i=0;i<data.length;i++){
+                        cateHtml+='<a href="javascript:void(0)" onclick="searchProduct(this)" pcate="'+cateId+'" cateId="'+data[i].id+'">'+data[i].name+'</a>';
+                    }
+                    cateHtml+='</div>';
+                    cateHtml+='</div>';
+                }
+            }
+        })
+        return cateHtml;
+    }
+    /**
+     * 初始化商品类别
+     */
+    function initCategory() {
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8090/queryMenuList",
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                if(result.code == 200){
+                    var data=result.data;
+                    //拼接类别菜单
+                    var cateHtml="";
+                    for(var i=0;i<data.length;i++){
+                        cateHtml+="<li cateid='"+data[i].id+"'>";
+                        cateHtml+="<h3>";
+                        cateHtml+=data[i].name;
+                        var childrens=data[i].children;
+                        if(childrens.length != 0){
+                            cateHtml+='<div class="sub-group">';
+                            for(var j=0;j<childrens.length;j++){
+                                if(j<3){
+                                    cateHtml+='<a href="javacript:void(0);" pcate="'+data[i].id+'"  onclick="searchProduct(this)" cateId="'+childrens[j].id+'">'+childrens[j].name+'</a>';
+                                }else{
+                                    break;
+                                }
+                            }
+                            cateHtml+='<div class="fix"></div>';
+                            cateHtml+='</div>';
+                            cateHtml+='<span class="menu-more">更多</span>';
+                        }
+                        cateHtml+= "</h3>";
+                        cateHtml+="</li>";
+                        $(".sec-mainNav").html(cateHtml);
+                    }
+                }
+            }
+        })
+    }
+
+    /**
+     * 查询商品数据
+     * @param obj
+     */
+    function searchProduct(obj) {
+        var cateId=$(obj).attr("cateId");
+        var brandId=$(obj).attr("brandId");
+        var pcateId=$(obj).attr("pcate");
+        if (typeof(cateId) == "undefined")
+        {
+            cateId=null;
+        }
+        if (typeof(brandId) == "undefined")
+        {
+            brandId=null;
+        }
+        getAllCategoryByPidForProduct(pcateId,cateId);
+        getAllBrandByCateIdForProduct(pcateId,brandId);
+        intiProductData(pcateId,cateId,brandId);
+    }
+
+    function intiProductData(pcateId,cateId,brandId) {
+
+    }
+
+    /**
+     * 通过商品类别ID获取所有品牌,用于商品展示
+     * */
+    function getAllBrandByCateIdForProduct(pcateId,brandId){
+        var cateHtml="";
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8090/brands/"+pcateId,
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                if(result.code == 200){
+                    var data=result.data;
+                    //拼接类别菜单
+                    cateHtml+='<div class="menu-panel-bd">';
+                    cateHtml+=' <ul>';
+                    for(var i=0;i<data.length;i++){
+                        if(brandId==data[i].brandId){
+                            cateHtml+='<li><a class="achecked" href="javascript:void(0)" pcate="'+pcateId+'"  onclick="checkClassBrandOnclick(this)" brandId="'+data[i].brandId+'"><img src="'+data[i].brandLogo+'" /></a></li>';
+                        }else{
+                            cateHtml+='<li><a href="javascript:void(0)" pcate="'+pcateId+'" onclick="checkClassBrandOnclick(this)" brandId="'+data[i].brandId+'"><img src="'+data[i].brandLogo+'" /></a></li>';
+                        }
+                    }
+                    cateHtml+='</ul>';
+                    cateHtml+='</div>';
+                    $("#brandMain").html(cateHtml);
+                }
+            }
+        })
+        return cateHtml;
+    }
+    /**
+     * 通过商品类别ID获取所有子类别用户类别展示
+     * */
+    function getAllCategoryByPidForProduct(pcateId,cateId){
+        var cateHtml="";
+        $.ajax({
+            type:"get",
+            url:"http://localhost:8090/categorys/"+pcateId,
+            dataType:"json",
+            async:false,
+            success:function (result) {
+                if(result.code == 200){
+                    var data=result.data;
+                    //拼接类别菜单
+                    cateHtml+='<div class="menu-panel-hd">';
+                    cateHtml+='<h4>热门分类</h4>';
+                    cateHtml+='<div class="sub-group">';
+                    for(var i=0;i<data.length;i++){
+                        if(cateId==data[i].id){
+                            cateHtml+='<a class="achecked" pcate="'+pcateId+'" href="javascript:void(0)" onclick="checkClassCateOnclick(this)" cateId="'+data[i].id+'">'+data[i].name+'</a>';
+                        }else{
+                            cateHtml+='<a href="javascript:void(0)" pcate="'+pcateId+'" onclick="checkClassCateOnclick(this)" cateId="'+data[i].id+'">'+data[i].name+'</a>';
+                        }
+                    }
+                    cateHtml+='</div>';
+                    cateHtml+='</div>';
+                    $("#categoryMain").html(cateHtml);
+                }
+            }
+        })
+        return cateHtml;
+    }
+    //通过点击品牌修改选中样式
+    function checkClassBrandOnclick(obj){
+        var allNodes=$(obj).parent(0).siblings();
+        allNodes.each(function () {
+            $(this).find("a").removeClass("achecked");
+        })
+        $(obj).addClass("achecked");
+    }
+
+    //通过点击类型修改选中样式
+    function  checkClassCateOnclick(obj) {
+        var allNodes=$(obj).siblings().removeClass("achecked");
+        $(obj).addClass("achecked");
+    }
+</script>
+
+</body>
+</html>
